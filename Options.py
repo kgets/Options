@@ -60,9 +60,16 @@ def requestOptChain(ticker,calls):
     quote = r.json()['optionChain']['result'][0]['quote']
     price = round((quote['bid']*quote['ask'])**0.5 , 2)
     #add annualized interest column
-    returnDf['Annualized Interest'] = round(((1+(returnDf['logMidPrice']/(returnDf['strike']-returnDf['logMidPrice'])))**(1/(returnDf['DTE']/365))-1)*100,2)
+    estCommission = 1.50 #Hard coded rough estimated commision & Fees cost for trade.
+    returnDf['AnnualizedInterest'] = 0
+    #ITM calc
+    #returnDf.AnnualizedInterest = returnDf.AnnualizedInterest.where(price > returnDf.strike, round( ,2))
+    #OTM calc
+    #round(((1+((returnDf['logMidPrice']-estCommission/100)/(price-returnDf['logMidPrice'])))**(1/(returnDf['DTE']/365))-1)*100,2)
+    #returnDf.AnnualizedInterest = returnDf.AnnualizedInterest.where( price > returnDf.strike, round(((1+((returnDf.logMidPrice-estCommission/100)/(price-returnDf.logMidPrice)))**(1/(returnDf.DTE/365))-1)*100,2))
     #drop unneeded columns
     returnDf.drop(['currency','percentChange','contractSize','inTheMoney','lastPrice','lastTradeDate','contractSymbol','change'], axis=1, inplace=True)
+    returnDf = returnDf[['bid','ask','logMidPrice','expiration','DTE','impliedVolatility','openInterest','strike','volume','AnnualizedInterest']]
     return returnDf
         
 ## < Main >
@@ -73,5 +80,6 @@ calls = True
 optChain = requestOptChain(ticker,calls)
 quote = requestQuote(ticker)
 price = round((quote['bid']+quote['ask'])/2,2)
+optChainF = optChain[(optChain.openInterest>0) & (optChain.AnnualizedInterest < 5000) & (optChain.AnnualizedInterest > 0)]
 #DTE = optChain['expiration'].apply(lambda x: datetime.datetime.strptime(x, '%m-%d-%Y') - date).days
 #optChain['Annualized Interest'] = (1+(optChain['logMidPrice']/(optChain['strike']-optChain['logMidPrice'])))**(1/(DTE/365))-1
