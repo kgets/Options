@@ -22,7 +22,7 @@ def requestExpirations(ticker):
     if r.json()['optionChain']['error'] is None:
         resp = r.json()['optionChain']['result'][0]['expirationDates']
     else:
-        raise Exception('You done fucked up on that Request!')
+        raise Exception('Error With Your Request!')
     return resp
 
 def requestQuote(ticker):
@@ -31,7 +31,7 @@ def requestQuote(ticker):
     if r.json()['optionChain']['error'] is None:
         resp = r.json()['optionChain']['result'][0]['quote']
     else:
-        raise Exception('You done fucked up on that Request!')
+        raise Exception('Error With Your Request!')
     return resp
 
 def requestOptChain(ticker,calls):
